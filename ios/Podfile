@@ -1,19 +1,26 @@
-platform :ios, '15.0'
+# 1. Hii mistari inatafuta faili la podhelper.rb kwa usahihi
+flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.xcframework', 'ios-arm64_x86_64-simulator', 'Flutter.framework', 'podhelper.rb'), __FILE__)
+# Kama hiyo haipo, jaribu njia mbadala ya kawaida
+if !File.exist?(flutter_install_all_ios_pods_helper)
+  flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.framework', 'podhelper.rb'), __FILE__)
+end
 
-# Inasaidia kuzuia matatizo ya njia (paths) kwenye Xcode
-install! 'cocoapods', :disable_input_output_paths => true
+# Ipakie (Load)
+load flutter_install_all_ios_pods_helper if File.exist?(flutter_install_all_ios_pods_helper)
+
+# 2. Mipangilio ya iOS
+platform :ios, '15.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # USISAHAU MSTARI HUU CHINI - Huu ndio unaounganisha plugins zote
+  # Sasa hii amri itatambuliwa kwa sababu tumepakia podhelper.rb hapo juu
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    # Ongeza hii pia kwa usalama zaidi wa mipangilio ya Flutter
     flutter_additional_ios_build_settings(target)
 
     target.build_configurations.each do |config|
