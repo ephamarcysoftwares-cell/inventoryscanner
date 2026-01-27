@@ -3,7 +3,7 @@ workflows:
     name: Inventory iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
-    working_directory: inventoryscanner
+    # Ondoa working_directory ya zamani, sasa tunatumia root
     environment:
       flutter: stable
       xcode: latest
@@ -11,16 +11,10 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
-          # Kama mradi upo ndani ya folder la inventoryscanner/inventoryscanner
-          if [ -d "inventoryscanner" ]; then
-            cd inventoryscanner
-          fi
+          # Amri rahisi kwa sababu pubspec.yaml ipo hapa hapa root
           flutter pub get
       - name: Flutter build iOS
         script: |
-          if [ -d "inventoryscanner" ]; then
-            cd inventoryscanner
-          fi
           flutter build ios --release --no-codesign
     artifacts:
-      - "**/build/ios/iphoneos/*.app"
+      - build/ios/iphoneos/*.app
