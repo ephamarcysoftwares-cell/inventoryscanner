@@ -1,10 +1,8 @@
-# Faili hili linapaswa kukaa nje kabisa ya folder la inventoryscanner
 workflows:
   ios-workflow:
     name: Inventory iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
-    # Inaiambia Codemagic mradi upo ndani ya folder hili
     working_directory: inventoryscanner
     environment:
       flutter: stable
@@ -13,14 +11,16 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
-          # Ingia ndani ya folder na upate packages
-          cd $CM_BUILD_DIR/inventoryscanner
+          # Kama mradi upo ndani ya folder la inventoryscanner/inventoryscanner
+          if [ -d "inventoryscanner" ]; then
+            cd inventoryscanner
+          fi
           flutter pub get
       - name: Flutter build iOS
         script: |
-          # Ingia ndani ya folder na build iOS (bila codesign kwa sasa)
-          cd $CM_BUILD_DIR/inventoryscanner
+          if [ -d "inventoryscanner" ]; then
+            cd inventoryscanner
+          fi
           flutter build ios --release --no-codesign
     artifacts:
-      # Inachukua faili la .app lililotengenezwa
-      - inventoryscanner/build/ios/iphoneos/*.app
+      - "**/build/ios/iphoneos/*.app"
