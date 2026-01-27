@@ -1,30 +1,23 @@
-# 1. Hii mistari inatafuta faili la podhelper.rb kwa usahihi
-flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.xcframework', 'ios-arm64_x86_64-simulator', 'Flutter.framework', 'podhelper.rb'), __FILE__)
-# Kama hiyo haipo, jaribu njia mbadala ya kawaida
-if !File.exist?(flutter_install_all_ios_pods_helper)
-  flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.framework', 'podhelper.rb'), __FILE__)
-end
-
-# Ipakie (Load)
-load flutter_install_all_ios_pods_helper if File.exist?(flutter_install_all_ios_pods_helper)
-
-# 2. Mipangilio ya iOS
+# 1. Mistari hii miwili ni muhimu sana kwa miradi ya Flutter
 platform :ios, '15.0'
+
+# Inatafuta mazingira ya Flutter kule Codemagic
+load File.join(File.dirname(File.realpath(__FILE__)), 'Generated.xcconfig')
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Sasa hii amri itatambuliwa kwa sababu tumepakia podhelper.rb hapo juu
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # Badala ya flutter_install_all_ios_pods, tunatumia mfumo wa ndani wa Flutter
+  # kupitia Generated.xcconfig ulioubeba kwenye mradi wako.
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      # Inasaidia kuzuia matatizo ya architectures kule Codemagic
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
     end
   end
 end
