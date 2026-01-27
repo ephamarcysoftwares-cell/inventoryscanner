@@ -1,0 +1,75 @@
+name: INVENTORY_BUILD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build_ios:
+    name: Build iOS App
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.19.0
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build iOS App (No Codesign)
+        run: |
+          flutter build ios --release --no-codesign \
+          --obfuscate --split-debug-info=build/ios/symbols
+
+      - name: Package iOS App
+        run: |
+          mkdir -p build/ios/iphoneos/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
+          cd build/ios/iphoneos
+          zip -r ../../../inventory_ios_build.zip Payload
+
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Inventory-iOS-App
+          path: inventory_ios_build.zip
+          retention-days: 7
+
+  build_android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.19.0
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Build Android AppBundle
+        run: flutter build appbundle --release
+
+      - name: Upload Android Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Inventory-Android-App
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+          retention-days: 7
