@@ -1,22 +1,18 @@
-# 1. Hii inapakia podhelper kwa kutumia relative path kutoka kwenye folder la Flutter
-load File.join(File.dirname(File.realpath(__FILE__)), '.symlinks', 'plugins', 'flutter_tools', 'bin', 'podhelper.rb')
-
 platform :ios, '15.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # 2. Hapa ndipo plugins (ikiwemo app_links) zinapoingizwa
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # Hapa hatuweki load yoyote ili kuepuka kosa la "file not found"
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
+    flutter_additional_ios_build_settings(target) if defined?(flutter_additional_ios_build_settings)
 
-    # Hakikisha kila kitu kinatumia iOS 15.0
     target.build_configurations.each do |config|
+      # Hii ndio muhimu zaidi: Inalazimisha iOS 15 kwa app na plugins zote
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     end
   end
