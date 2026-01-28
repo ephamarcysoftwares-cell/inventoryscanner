@@ -1,25 +1,29 @@
-# 1. Hii mistari miwili ni muhimu ili Codemagic iweze kusoma plugins zako
-platform :ios, '15.0'
+# 1. Hii inatafuta faili la podhelper ndani ya Flutter SDK ya seva
+flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.xcframework', 'ios-arm64_x86_64-simulator', 'Flutter.framework', 'podhelper.rb'), __FILE__)
 
-# Inapakia maelekezo ya Flutter plugins
-require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), Gem.loaded_specs['flutter'].full_gem_path) if Gem.loaded_specs['flutter']
+# Kama haipo hapo, jaribu njia mbadala
+if !File.exist?(flutter_install_all_ios_pods_helper)
+  flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.framework', 'podhelper.rb'), __FILE__)
+end
+
+# Pakia maelekezo ya Flutter
+load flutter_install_all_ios_pods_helper if File.exist?(flutter_install_all_ios_pods_helper)
+
+platform :ios, '15.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # 2. MSTARI MUHIMU: Huu ndio unaleta 'app_links' na plugins nyingine kwenye Xcode
+  # 2. Sasa amri hii itatambuliwa kwa uhakika
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-      # Inasaidia kuzuia migongano ya mifumo (architectures)
-      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
     end
   end
 end
