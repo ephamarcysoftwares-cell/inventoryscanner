@@ -11,17 +11,20 @@ workflows:
       - name: Get Flutter packages
         script: |
           flutter pub get
-      - name: Reset and Set Deployment Target
+      - name: Reset and Set Deployment Target to 15.0
         script: |
-          # Futa folder la ios lenye matatizo
           rm -rf ios
-          # Tengeneza upya folder la ios
           flutter create . --platforms=ios
           
-          # Hapa ndipo tunalazimisha iOS 14.0 bila kutumia Podfile
-          # Tunatumia 'sed' kubadilisha namba moja kwa moja kwenye Xcode project settings
-          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 12.0/IPHONEOS_DEPLOYMENT_TARGET = 14.0/g' {} +
-          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 13.0/IPHONEOS_DEPLOYMENT_TARGET = 14.0/g' {} +
+          # Hii inatafuta kila mahali kwenye project settings na kuweka 15.0
+          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' {} +
+          
+          # Pia tunalazimisha kwenye faili la Info.plist kama lipo
+          if [ -f ios/Runner/Info.plist ]; then
+            sed -i '' 's/12.0/15.0/g' ios/Runner/Info.plist
+            sed -i '' 's/13.0/15.0/g' ios/Runner/Info.plist
+            sed -i '' 's/14.0/15.0/g' ios/Runner/Info.plist
+          fi
 
       - name: Flutter build iOS
         script: |
