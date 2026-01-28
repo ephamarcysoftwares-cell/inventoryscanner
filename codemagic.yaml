@@ -1,22 +1,40 @@
 workflows:
-  android-workflow:
-    name: Inventory Android Build
+  ios-workflow:
+    name: Inventory iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
       flutter: stable
-      java: 17
+      xcode: latest
+      cocoapods: default
     scripts:
       - name: Get Flutter packages
         script: |
+          rm -f pubspec.lock
           flutter pub get
-      - name: Build Android APK
+      - name: Reset and Set Deployment Target to 16.0
         script: |
-          # Jenga APK ya Release
-          flutter build apk --release --build-name=1.1.72 --build-number=72
+          # Futa na tengeneza folder la ios upya ili kusiwe na Podfile mbovu
+          rm -rf ios
+          flutter create . --platforms=ios
+          
+          # Kulazimisha iOS 16.0 kwenye mipangilio ya Xcode
+          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' {} +
+          
+          # Kusahihisha matoleo kwenye Info.plist
+          if [ -f ios/Runner/Info.plist ]; then
+            sed -i '' 's/12.0/16.0/g' ios/Runner/Info.plist
+            sed -i '' 's/13.0/16.0/g' ios/Runner/Info.plist
+            sed -i '' 's/14.0/16.0/g' ios/Runner/Info.plist
+            sed -i '' 's/15.0/16.0/g' ios/Runner/Info.plist
+            sed -i '' 's/15.5/16.0/g' ios/Runner/Info.plist
+          fi
+          
+          # Sasisha vyanzo vya CocoaPods
+          cd ios && pod repo update
+      - name: Flutter build iOS (Simulator)
+        script: |
+          # Hii inajenga app kwa ajili ya Simulator ambayo haihitaji saini (No Codesign)
+          flutter build ios --release --simulator --no-codesign
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
-    publishing:
-      email:
-        recipients:
-          - mlyukakenedy@gmail.com
+      - build/ios/iphonesimulator/*.app
