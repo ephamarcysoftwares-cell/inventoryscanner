@@ -12,7 +12,7 @@ dependencies:
 
   # Core Packages
   supabase_flutter: ^2.10.3
-  mobile_scanner: ^5.1.1
+  mobile_scanner: ^6.0.0
   in_app_update: ^4.2.2
   window_manager: ^0.5.1
   package_info_plus: ^9.0.0
@@ -103,8 +103,8 @@ dependencies:
   camera: ^0.10.5
   video_player_web: ^2.0.0
   flutter_inappwebview: ^6.0.0
-  firebase_core: ^4.3.0
-  firebase_messaging: ^16.1.0
+  firebase_core: ^3.10.1
+  firebase_messaging: ^15.2.1
   version: ^3.0.2
 
 dev_dependencies:

@@ -10,25 +10,22 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
+          # Futa lock file ili kuruhusu versions mpya zikubaliane
+          rm -f pubspec.lock
           flutter pub get
       - name: Reset and Set Deployment Target to 15.0
         script: |
           rm -rf ios
           flutter create . --platforms=ios
           
-          # Hii inatafuta kila mahali kwenye project settings na kuweka 15.0
+          # Badilisha Deployment Target kuwa 15.0 kwenye Xcode project
           find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' {} +
           
-          # Pia tunalazimisha kwenye faili la Info.plist kama lipo
-          if [ -f ios/Runner/Info.plist ]; then
-            sed -i '' 's/12.0/15.0/g' ios/Runner/Info.plist
-            sed -i '' 's/13.0/15.0/g' ios/Runner/Info.plist
-            sed -i '' 's/14.0/15.0/g' ios/Runner/Info.plist
-          fi
-
+          # MUHIMU: Update CocoaPods repos ili kupata matoleo yanayokubaliana
+          cd ios
+          pod repo update
       - name: Flutter build iOS
         script: |
-          # Jenga app bila codesigning
           flutter build ios --release --no-codesign
     artifacts:
       - build/ios/iphoneos/*.app
