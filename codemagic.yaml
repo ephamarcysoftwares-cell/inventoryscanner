@@ -10,19 +10,24 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
-          rm -f pubspec.lock
+          # Lazimisha file_picker ya kisasa
+          flutter pub add file_picker
           flutter pub get
-      - name: Fix FilePicker and Reset iOS
+      - name: Fix FilePicker Code and Reset iOS
         script: |
-          # Hii inatafuta 'FilePicker.platform' na kuibadilisha kuwa 'FilePicker.instance' kwenye kodi yote
-          find . -name "*.dart" -exec sed -i '' 's/FilePicker.platform/FilePicker.instance/g' {} +
+          # Hii script itafuta 'FilePicker.platform.' au 'FilePicker.instance.' 
+          # na kuacha 'FilePicker.' pekee ambayo inakubalika kwenye matoleo mengi
+          find . -name "*.dart" -exec sed -i '' 's/FilePicker\.platform\./FilePicker\./g' {} +
+          find . -name "*.dart" -exec sed -i '' 's/FilePicker\.instance\./FilePicker\./g' {} +
           
           rm -rf ios
           flutter create . --platforms=ios
           flutter precache --ios
           
+          # Force iOS 16.0
           find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' {} +
           
+          # Safisha Podfile post_install
           sed -i '' '/post_install do |installer|/,$d' ios/Podfile
           echo "post_install do |installer|" >> ios/Podfile
           echo "  installer.pods_project.targets.each do |target|" >> ios/Podfile
