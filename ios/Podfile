@@ -1,24 +1,22 @@
-# 1. Hii inapakia maelekezo ya Flutter yaliyopo tayari kwenye folder lako
-load File.expand_path(File.join('frameworks', 'podhelper.rb'), __dir__) if File.exist?(File.expand_path(File.join('frameworks', 'podhelper.rb'), __dir__))
-
 platform :ios, '15.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # 2. Hapa ndipo tunalazimisha plugins zote zijisajili
-  if respond_to?(:flutter_install_all_ios_pods)
-    flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  end
+  # Badala ya kutafuta flutter_tools, tunaitafuta app_links moja kwa moja
+  # Hii inalazimisha CocoaPods kuiona plugin hata kama Flutter podhelper imefeli
+  pod 'app_links', :path => File.join('..', '.symlinks', 'plugins', 'app_links', 'ios')
+
+  # Ikiwa unatumia Firebase, ongeza na hii:
+  pod 'firebase_core', :path => File.join('..', '.symlinks', 'plugins', 'firebase_core', 'ios')
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target) if respond_to?(:flutter_additional_ios_build_settings)
-
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
     end
   end
 end
