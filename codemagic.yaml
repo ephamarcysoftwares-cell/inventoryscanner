@@ -14,21 +14,28 @@ workflows:
           flutter pub get
       - name: Reset and Set Deployment Target to 16.0
         script: |
-          # Futa na tengeneza folder la ios upya
           rm -rf ios
           flutter create . --platforms=ios
-          
-          # Hii ni muhimu ili kuzuia kosa la Podfile kule Codemagic
           flutter precache --ios
           
-          # Kulazimisha iOS 16.0 kila mahali
+          # Force iOS 16.0
           find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' {} +
           
-          # Sasisha vyanzo vya CocoaPods
-          cd ios && pod repo update
+          # FIX: Hii script inalazimisha SwiftyTesseract kukubali architecture ya Simulator
+          echo "post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              flutter_additional_ios_build_settings(target)
+              target.build_configurations.each do |config|
+                config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+                config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+              end
+            end
+          end" >> ios/Podfile
+
+          cd ios && pod install --repo-update
       - name: Flutter build iOS (Simulator)
         script: |
-          # MUHIMU: Tunatumia --debug kwa simulator ili build isifeli
-          flutter build ios --debug --simulator
+          # Tunajenga kwa simulator tukiambia Xcode ipuuze architecture conflicts
+          flutter build ios --debug --simulator --extra-gen-snapshot-options="--no-deterministic"
     artifacts:
       - build/ios/iphonesimulator/*.app
