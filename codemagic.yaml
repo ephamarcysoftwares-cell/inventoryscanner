@@ -12,12 +12,17 @@ workflows:
         script: |
           rm -f pubspec.lock
           flutter pub get
-      - name: Reset and Set Deployment Target
+      - name: Fix FilePicker and Reset iOS
         script: |
+          # Hii inatafuta 'FilePicker.platform' na kuibadilisha kuwa 'FilePicker.instance' kwenye kodi yote
+          find . -name "*.dart" -exec sed -i '' 's/FilePicker.platform/FilePicker.instance/g' {} +
+          
           rm -rf ios
           flutter create . --platforms=ios
           flutter precache --ios
+          
           find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' {} +
+          
           sed -i '' '/post_install do |installer|/,$d' ios/Podfile
           echo "post_install do |installer|" >> ios/Podfile
           echo "  installer.pods_project.targets.each do |target|" >> ios/Podfile
@@ -29,6 +34,7 @@ workflows:
           echo "    end" >> ios/Podfile
           echo "  end" >> ios/Podfile
           echo "end" >> ios/Podfile
+          
           cd ios && pod install --repo-update
       - name: Flutter build iOS (Simulator)
         script: |
