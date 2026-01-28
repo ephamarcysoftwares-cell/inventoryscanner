@@ -12,37 +12,26 @@ workflows:
         script: |
           rm -f pubspec.lock
           flutter pub get
-      - name: Reset and Set Deployment Target to 16.0
+      - name: Reset and Set Deployment Target
         script: |
           rm -rf ios
           flutter create . --platforms=ios
           flutter precache --ios
-          
-          # 1. Force iOS 16.0 kwenye project file
           find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' {} +
-          
-          # 2. Futa kila kitu kuanzia 'post_install' hadi mwisho wa Podfile ili tuepuke migongano
           sed -i '' '/post_install do |installer|/,$d' ios/Podfile
-          
-          # 3. Ongeza post_install yetu mpya iliyoboreshwa kwa Tesseract na iOS 16
-          cat <<EOF >> ios/Podfile
-
-  post_install do |installer|
-  installer.pods_project.targets.each do |target|
-  flutter_additional_ios_build_settings(target)
-  target.build_configurations.each do |config|
-  config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
-  config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
-  config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386 arm64'
-  end
-  end
-  end
-  EOF
-  
-  cd ios && pod install --repo-update
-- name: Flutter build iOS (Simulator)
-  script: |
-    # Tunajenga kwa simulator tukiambia Xcode ipuuze architecture conflicts
-    flutter build ios --debug --simulator
-artifacts:
-  - build/ios/iphonesimulator/*.app
+          echo "post_install do |installer|" >> ios/Podfile
+          echo "  installer.pods_project.targets.each do |target|" >> ios/Podfile
+          echo "    flutter_additional_ios_build_settings(target)" >> ios/Podfile
+          echo "    target.build_configurations.each do |config|" >> ios/Podfile
+          echo "      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'" >> ios/Podfile
+          echo "      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'" >> ios/Podfile
+          echo "      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386 arm64'" >> ios/Podfile
+          echo "    end" >> ios/Podfile
+          echo "  end" >> ios/Podfile
+          echo "end" >> ios/Podfile
+          cd ios && pod install --repo-update
+      - name: Flutter build iOS (Simulator)
+        script: |
+          flutter build ios --debug --simulator
+    artifacts:
+      - build/ios/iphonesimulator/*.app
