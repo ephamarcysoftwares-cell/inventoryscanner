@@ -14,27 +14,21 @@ workflows:
           flutter pub get
       - name: Reset and Set Deployment Target to 16.0
         script: |
-          # Futa na tengeneza folder la ios upya ili kusiwe na Podfile mbovu
+          # Futa na tengeneza folder la ios upya
           rm -rf ios
           flutter create . --platforms=ios
           
-          # Kulazimisha iOS 16.0 kwenye mipangilio ya Xcode
-          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' {} +
+          # Hii ni muhimu ili kuzuia kosa la Podfile kule Codemagic
+          flutter precache --ios
           
-          # Kusahihisha matoleo kwenye Info.plist
-          if [ -f ios/Runner/Info.plist ]; then
-            sed -i '' 's/12.0/16.0/g' ios/Runner/Info.plist
-            sed -i '' 's/13.0/16.0/g' ios/Runner/Info.plist
-            sed -i '' 's/14.0/16.0/g' ios/Runner/Info.plist
-            sed -i '' 's/15.0/16.0/g' ios/Runner/Info.plist
-            sed -i '' 's/15.5/16.0/g' ios/Runner/Info.plist
-          fi
+          # Kulazimisha iOS 16.0 kila mahali
+          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9][0-9]*\.[0-9]/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' {} +
           
           # Sasisha vyanzo vya CocoaPods
           cd ios && pod repo update
       - name: Flutter build iOS (Simulator)
         script: |
-          # Hii inajenga app kwa ajili ya Simulator ambayo haihitaji saini (No Codesign)
-          flutter build ios --release --simulator --no-codesign
+          # MUHIMU: Tunatumia --debug kwa simulator ili build isifeli
+          flutter build ios --debug --simulator
     artifacts:
       - build/ios/iphonesimulator/*.app
