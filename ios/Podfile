@@ -1,29 +1,22 @@
-# 1. Hii inatafuta faili la podhelper ndani ya Flutter SDK ya seva
-flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.xcframework', 'ios-arm64_x86_64-simulator', 'Flutter.framework', 'podhelper.rb'), __FILE__)
-
-# Kama haipo hapo, jaribu njia mbadala
-if !File.exist?(flutter_install_all_ios_pods_helper)
-  flutter_install_all_ios_pods_helper = File.expand_path(File.join('..', '..', 'flutter', 'bin', 'internal', 'shared', 'sdk', 'ios', 'Frameworks', 'Flutter.framework', 'podhelper.rb'), __FILE__)
-end
-
-# Pakia maelekezo ya Flutter
-load flutter_install_all_ios_pods_helper if File.exist?(flutter_install_all_ios_pods_helper)
-
 platform :ios, '15.0'
+
+# Inasaidia kuzuia matatizo ya "paths" na "input/output" kule Codemagic
+install! 'cocoapods', :disable_input_output_paths => true
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # 2. Sasa amri hii itatambuliwa kwa uhakika
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # Badala ya kutumia flutter_install_all_ios_pods,
+  # CocoaPods itazisoma plugins kupitia symlinks otomatiki
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
+    # Hii inalazimisha kila plugin (app_links, firebase, n.k.) itumie iOS 15.0
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
     end
   end
 end
