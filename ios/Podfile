@@ -1,16 +1,25 @@
+# 1. Hii mistari miwili ni muhimu ili Codemagic iweze kusoma plugins zako
 platform :ios, '15.0'
+
+# Inapakia maelekezo ya Flutter plugins
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), Gem.loaded_specs['flutter'].full_gem_path) if Gem.loaded_specs['flutter']
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Hii inategemea Flutter environment ya Codemagic
+  # 2. MSTARI MUHIMU: Huu ndio unaleta 'app_links' na plugins nyingine kwenye Xcode
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      # Inasaidia kuzuia migongano ya mifumo (architectures)
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
     end
   end
 end
