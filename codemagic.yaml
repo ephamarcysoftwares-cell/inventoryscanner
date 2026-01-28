@@ -3,7 +3,6 @@ workflows:
     name: Inventory iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
-    # Ondoa working_directory ya zamani, sasa tunatumia root
     environment:
       flutter: stable
       xcode: latest
@@ -11,10 +10,22 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: |
-          # Amri rahisi kwa sababu pubspec.yaml ipo hapa hapa root
           flutter pub get
+      - name: Reset and Set Deployment Target
+        script: |
+          # Futa folder la ios lenye matatizo
+          rm -rf ios
+          # Tengeneza upya folder la ios
+          flutter create . --platforms=ios
+          
+          # Hapa ndipo tunalazimisha iOS 14.0 bila kutumia Podfile
+          # Tunatumia 'sed' kubadilisha namba moja kwa moja kwenye Xcode project settings
+          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 12.0/IPHONEOS_DEPLOYMENT_TARGET = 14.0/g' {} +
+          find ios/Runner.xcodeproj/project.pbxproj -type f -exec sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 13.0/IPHONEOS_DEPLOYMENT_TARGET = 14.0/g' {} +
+
       - name: Flutter build iOS
         script: |
+          # Jenga app bila codesigning
           flutter build ios --release --no-codesign
     artifacts:
       - build/ios/iphoneos/*.app
